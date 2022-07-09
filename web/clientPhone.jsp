@@ -8,14 +8,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
-    <title>查询手机归属地</title>
+    <title>内容获取</title>
 </head>
 <body>
 <form action="phoneClientServlet" method="post">
-    用户名：<input type="text" placeholder="请输入用户名" name="userUrl"><br>
-    <button type="submit" name="submit">登录</button>
+    IP地址：<input type="text" name="userUrl"><br>
+    <button type="submit" name="submit">进入</button>
 </form>
 <%--<input type="button" value="jumpweb" onclick="window.location.href='register.jsp'">--%>
-<div></div>
+<div><% String str = " "+ request.getAttribute("users");%>
+    <%= "网页内容为："+str%>
+</div>
 </body>
 </html>

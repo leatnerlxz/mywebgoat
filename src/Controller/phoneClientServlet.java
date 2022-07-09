@@ -1,44 +1,60 @@
 package Controller;
 
-import org.w3c.dom.ls.LSOutput;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.*;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.http.HttpClient;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
 
 public class phoneClientServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String userURL = req.getParameter("userURL");//url
-        String htmlcontent = "";
+        String userURL = req.getParameter("userUrl");//url
+        System.out.println(userURL);
+        String html = null;
         try {
-            URL u = new URL(userURL);
-            URLConnection urlConnection = u.openConnection();
-            HttpURLConnection httpURLConnection = (HttpURLConnection) urlConnection;
-            BufferedReader base = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-            StringBuffer html = new StringBuffer();
-            while ((htmlcontent = base.readLine())!= null){
-                html.append(htmlcontent);
+            if(userURL == null){
+                System.out.println("路径为空");
             }
-            base.close();
-            System.out.println("端口探测");
-            System.out.println(urlConnection);
-            System.out.println(html.toString());
+            else {
+                //创建一个httpclient对象
+                CloseableHttpClient httpclient = HttpClients.createDefault();
+                //创建HttpGet请求，并进行相关设置
+                HttpGet httpGet = new HttpGet(userURL);
+                //发起请求
+                CloseableHttpResponse closeableHttpResponse = httpclient.execute(httpGet);
+                try {
+                    System.out.println(closeableHttpResponse.getStatusLine());//输出http状态
+                    //获取http的response的请求实体
+                    HttpEntity entity = closeableHttpResponse.getEntity();
+                    //将网页内容转成字符串
+                    html = EntityUtils.toString(entity,"UTF-8");
+                    System.out.println(html);
+                    //释放httpEntity所持有的资源
+                    EntityUtils.consume(entity);
+
+                }catch (Exception e){
+                    e.printStackTrace();
+                }finally {
+                    closeableHttpResponse.close();
+                }
+                req.setAttribute("htmlContent",html);
+                req.getRequestDispatcher("/clientPhone.jsp").forward(req,
+                        resp);
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
+
+
     }
 
     @Override
